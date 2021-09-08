@@ -1,6 +1,8 @@
 const express = require('express');
 const app =  express();
 const morgan =require('morgan');
+const mysql = require('mysql');
+
 //configuraciones
 app.set('port',process.env.PORT ||3000);
 app.set('json spaces',2);
