@@ -1,6 +1,14 @@
 const { Router }= require('express');
 const router = Router();
 
+//Conexion a la base de datos
+const mysql= require('mysql');
+const db_crede = require('./db_cred');
+var conn =mysql.createPool(db_crede);
+
+
+
+
 //Principal
 router.get('/',(req,res)=>{
     res.send('<h1>El servidor esta corriendo</h1>');
@@ -9,15 +17,20 @@ router.get('/',(req,res)=>{
 //registrarse
 router.post('/Registro',(req,res)=>{
     //se guarda aqui
-    const {registro,nombres,apellidos,contrasena,correo}= req.body;
+    const {registro,nombres,apellidos,contrasena,correo,cod_carrera}= req.body;
     //sem muestra en pantlla
     console.log(req.body);
     //condicion para verificar datos llenos
-   if (registro&&nombres&&apellidos&&contrasena&&correo){
+   if (registro&&nombres&&apellidos&&contrasena&&correo&&cod_carrera){
         // se guarda en la base de datos
-
-
-       res.json({'Mensaje':'se recibio info'});
+        let consulta = 'INSERT  INTO estudiante (registro_academico, nombre, apellido, password, correo, cod_carrera) VALUES(?, ?, ?, ?, ?, ?)'
+        conn.query(consulta,[parseInt(registro), nombres, apellidos, contrasena, correo, parseInt(cod_carrera)],function(erro,result){
+            if(erro)
+            throw erro;
+            res.status(200).json({
+                'Mensaje':'se Guardo el usuario'
+            })
+        })
    }
    else if (nombres&&apellidos&&contrasena&&correo){
        res.json({'Mensaje':'no hay registro'});
@@ -46,12 +59,11 @@ router.post('/login',(req,res)=>{
      //sem muestra en pantlla
      console.log(req.body);
     // se busca en la base de datos
-    if(registro=="registro de la db"&&contrasena=="contraseña de la db"){
-        res.json({'Mensaje':"Credenciales correctas"});
-    }
-    else{
-        res.json({'Mensaje':"Credenciales incorrectas"});
-    }
+    let consulta = 'select * from estudiante where registro_academico=?, password=?'
+    conn.query(consulta,[parseInt(registro),parse(contrasena)], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 });
 
 //recuperar contraseña
@@ -92,33 +104,34 @@ router.post('/Nuevapub',(req,res)=>{
 //mostrar las publicaciones
 router.get('/Publicaciones',(req,res)=>{
     //conecta la db para traer la informacion de las publicaciones
-    res.json('publicaciones')
+    let consulta = 'select * from publicacion'
+    conn.query(consulta, (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 });
 
 //filtros de curso en publicaciones
 router.get('/Publicaciones/:curso',(req,res)=>{
     var curso  = req.params.curso
     //conecta la db para traer la informacion de las publicaciones
-    //recorrer todas  las publicaciones
-    if(curso=='curso de la publicacion'){
-        res.json('se muestra la publicacion')
-    }
-    else{
-        //pasa de largo
-    }
+    let consulta = 'select * from publicacion where cod_curso=?'
+    conn.query(consulta,[curso], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 
 });
+
 //filtros de profesor en publicaciones
 router.get('/Publicaciones/:profesor',(req,res)=>{
     var profesor=req.params.profesor
     //conecta la db para traer la informacion de las publicaciones
-    //recorrer todas  las publicaciones
-    if(profesor=='profesor de la publicacion '){
-        res.json('se muestra la publicacion')
-    }
-    else{
-        //pasa de largo
-    }
+    let consulta = 'select * from publicacion where registro_catedratico=?'
+    conn.query(consulta,[profesor], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 
 });
 // ver perfil de otros usuarios
@@ -128,17 +141,14 @@ router.get('/verperfil/:registro',(req,res)=>{
     //se muestra en pantlla
     console.log(registro);
     //Recorrer los usuarios
-    //Se busca registro  de  cada usuario en la db
-    //Si coinciden los datos en el mismo usuario
-    if (registro='registro de la db'){
-        //se  muestran los datos
-        res.json({'Mensaje':'datos del usuario'});
-    }
-    else{
-        //No se muestra
-        res.json({'Mensaje':'El usuario no existe'});
-    }
+    let consulta = 'select * from estudiante where registro_academico=?'
+    conn.query(consulta,[registro], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
+
 });
+
 //Cursos aprobados de otras personas
 router.get('/cursos/:registro',(req,res)=>{
     //se guarda aqui
@@ -167,17 +177,15 @@ router.put('/miperfil/:registro',(req,res)=>{
     const {nombres,apellidos,contrasena,correo}= req.body;
     //se muestra en pantlla
     console.log(registro);
-    //Recorrer los usuarios
-    //Se busca registro  de  cada usuario en la db
-    //Si coinciden los datos en el mismo usuario
-    if (registro='registro de la db'){
-        //se cambian los datos
-        res.json({'Mensaje':'Se actualizaron los datos'});
-    }
-    else{
-        //No se muestra
-        res.json({'Mensaje':'El usuario no existe'});
-    }
+    let consulta = '???'
+    conn.query(consulta,[nombres,apellidos,contrasena,correo], (err, res)=>{
+        if(err)
+        throw err;
+        res.status(200).json({
+            'Mensaje':'se Actualizo el usuario'
+        })
+    })
+
 });
 
 //ver mis propios cursos
