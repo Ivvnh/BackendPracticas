@@ -59,8 +59,8 @@ router.post('/login',(req,res)=>{
      //sem muestra en pantlla
      console.log(req.body);
     // se busca en la base de datos
-    let consulta = 'select * from estudiante where registro_academico=?, password=?'
-    conn.query(consulta,[parseInt(registro),parse(contrasena)], (err, response)=>{
+    let consulta = 'select * from estudiante where registro_academico=? and password=?'
+    conn.query(consulta,[parseInt(registro),contrasena], (err, response)=>{
     if(err) throw err;
     res.send(response);
     })
@@ -177,11 +177,12 @@ router.put('/miperfil/:registro',(req,res)=>{
     const {nombres,apellidos,contrasena,correo}= req.body;
     //se muestra en pantlla
     console.log(registro);
-    let consulta = '???'
-    conn.query(consulta,[nombres,apellidos,contrasena,correo], (err, res)=>{
+    console.log(req.body);
+    let consulta = 'UPDATE estudiante SET nombre=?,apellido=?,password=?,correo=? WHERE registro_academico=?' 
+    conn.query(consulta,[nombres,apellidos,contrasena,correo,registro], (err, request)=>{
         if(err)
         throw err;
-        res.status(200).json({
+        res.json({
             'Mensaje':'se Actualizo el usuario'
         })
     })
