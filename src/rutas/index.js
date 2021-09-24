@@ -72,33 +72,27 @@ router.put('/Recuperacion',(req,res)=>{
     const {registro,correo}= req.body;
     //se muestra en pantlla
     console.log(req.body);
-    //Recorrer los usuarios
-    //Se busca registro y correo de  cada usuario en la db
-    //Si coinciden los datos en el mismo usuario
-    if (registro&&correo){
-        //Guardar nueva contraseña
-        res.json({'Mensaje':'Se Recupero la contraseña'});
-    }
-    else{
-        //No se guarda
-        res.json({'Mensaje':'El registro y correo no coinciden, vuelva a ingresar los datos'});
-    }
+    let consulta = 'select * from estudiante where password=? and correo=?'
+    conn.query(consulta,[parseInt(registro),correo], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 });
 
 //Hacer publicaciones
 router.post('/Nuevapub',(req,res)=>{
     //se guarda aqui
-    const {usuario,curso,profesor,mensaje,fecha}= req.body;
+    const {id,fecha,mensaje,usuario,profesor,curso}= req.body;
     //sem muestra en pantlla
     console.log(req.body);
-    if(usuario&&curso&&profesor&&mensaje&&fecha){
-        //Se guarda en la db
-        res.json({'Mensaje':'Se Realizo la publicacion'});
-    }
-    else {
-        //no se guarda la publicacion
-        res.json({'Mensaje':'Faltan datos  para  la publicacion'})
-    }  
+        let consulta = 'INSERT  INTO publicacion (id_publicacion,fecha_hora,descripcion, registro_academico,registro_catedratico, cod_curso) VALUES(?, ?, ?, ?, ?, ?)'
+        conn.query(consulta,[id,fecha,mensaje,usuario,profesor,curso],function(erro,result){
+            if(erro)
+            throw erro;
+            res.json({
+                'Mensaje':'se realizo la  publicacion'
+            })
+        })
 });
 
 //mostrar las publicaciones
@@ -134,13 +128,13 @@ router.get('/Publicaciones/:profesor',(req,res)=>{
     })
 
 });
+
 // ver perfil de otros usuarios
 router.get('/verperfil/:registro',(req,res)=>{
     //se guarda aqui
     var registro= req.params.registro
     //se muestra en pantlla
     console.log(registro);
-    //Recorrer los usuarios
     let consulta = 'select * from estudiante where registro_academico=?'
     conn.query(consulta,[registro], (err, response)=>{
     if(err) throw err;
@@ -177,7 +171,6 @@ router.put('/miperfil/:registro',(req,res)=>{
     const {nombres,apellidos,contrasena,correo}= req.body;
     //se muestra en pantlla
     console.log(registro);
-    console.log(req.body);
     let consulta = 'UPDATE estudiante SET nombre=?,apellido=?,password=?,correo=? WHERE registro_academico=?' 
     conn.query(consulta,[nombres,apellidos,contrasena,correo,registro], (err, request)=>{
         if(err)
