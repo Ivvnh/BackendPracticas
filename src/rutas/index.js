@@ -149,17 +149,12 @@ router.get('/cursos/:registro',(req,res)=>{
     var registro= req.params.registro
     //se muestra en pantlla
     console.log(registro);
-    //Recorrer los usuarios
-    //Se busca registro  de  cada usuario en la db
-    //Si coinciden los datos en el mismo usuario
-    if (registro='registro de la db'){
-        //se  muestran los datos
-        res.json({'Mensaje':'cursos aprobados del  usuario'});
-    }
-    else{
-        //No se muestra
-        res.json({'Mensaje':'El usuario no existe'});
-    }
+    let consulta = 'select * from curso_ganado_esudiante where registro_academico=?'
+    conn.query(consulta,[registro], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
+    
 });
 
 
@@ -176,7 +171,7 @@ router.put('/miperfil/:registro',(req,res)=>{
         if(err)
         throw err;
         res.json({
-            'Mensaje':'se Actualizo el usuario'
+            'Mensaje':'se actualizaron los datos'
         })
     })
 
@@ -188,37 +183,44 @@ router.get('/miscursos/:registro',(req,res)=>{
     var registro= req.params.registro
     //se muestra en pantlla
     console.log(registro);
-    //Recorrer los usuarios
-    //Se busca registro  de  cada usuario en la db
-    //Si coinciden los datos en el mismo usuario
-    if (registro='registro de la db'){
-        //se  muestran los datos
-        res.json({'Mensaje':'mis cursos aprobados'});
-    }
-    else{
-        //No se muestra
-        res.json({'Mensaje':'El usuario no existe'});
-    }
+    let consulta = 'select * from curso_ganado_esudiante where registro_academico=?'
+    conn.query(consulta,[registro], (err, response)=>{
+    if(err) throw err;
+    res.send(response);
+    })
 });
 
 //Poner un curso aprobado
 router.post('/agregarcurso',(req,res)=>{
     //se guarda aqui
-    const {codigo,nombre,creditos,nota,fecha}= req.body;
+    const {codigo,registro}= req.body;
     //sem muestra en pantlla
     console.log(req.body);
-    if(codigo&&nombre&&creditos&&nota&&fecha){
-        //Se guarda en la db
-        res.json({'Mensaje':'Se agrego el curso'});
-    }
-    else {
-        //no se guarda la publicacion
-        res.json({'Mensaje':'Faltan datos  para  la agregar el curso'})
-    }  
-});
+    let consulta = 'INSERT  INTO curso_ganado_estudiante (cod_curso,registro_academico) VALUES(?, ?)'
+        conn.query(consulta,[parseInt(codigo),parseInt(registro)],function(erro,result){
+            if(erro)
+            throw erro;
+            res.json({
+                'Mensaje':'se Guardo el curso'
+            })
+        })
+    });
 
-
-//Faltan los comentarios
+// comentarios
+router.post('/agregarcomentario',(req,res)=>{
+    //se guarda aqui
+    const {id,fecha,descripcion,id_publicacion,registro}= req.body;
+    //sem muestra en pantlla
+    console.log(req.body);
+    let consulta = 'INSERT  INTO comentario (id_comentario,fecha_hora,descripcion,id_publicacion,registro_academico) VALUES(?, ?,?,?,?)'
+        conn.query(consulta,[id,fecha,descripcion,id_publicacion,registro],function(erro,result){
+            if(erro)
+            throw erro;
+            res.json({
+                'Mensaje':'se Guardo el curso'
+            })
+        })
+    });
 
 
 module.exports = router;
